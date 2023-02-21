@@ -32,7 +32,7 @@ function Plane() {
 
 function App() {
   return (
-      <HeaderGrid totalPoints={100}/>
+      <HeaderGrid totalPoints={1000}/>
     // <Canvas>
     //     <OrbitControls />
     //   <Stars />

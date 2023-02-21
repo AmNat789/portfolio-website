@@ -1,5 +1,5 @@
 import {Canvas} from "@react-three/fiber";
-import {OrbitControls} from "@react-three/drei";
+import {OrbitControls, Line} from "@react-three/drei";
 import * as THREE from "three";
 import {useLayoutEffect, useRef} from "react";
 
@@ -17,9 +17,10 @@ class Point {
     }
 
     addConnectedPoint(point: Point) {
-        if (this.connectedPoints.length > 1)
-            throw new Error('Point can only have 2 connected points');
-        else this.connectedPoints.push(point);
+        // if (this.connectedPoints.length > 1)
+        //     throw new Error('Point can only have 2 connected points');
+        // else
+            this.connectedPoints.push(point);
     }
 }
 
@@ -66,18 +67,26 @@ function createPoints(total: number) {
 function setConnectedPoints(edges: Edge[]) {
     for (let i = 0; i < edges.length; i++) {
         const edge = edges[i];
-        if (edge.p1.connectedPoints.length < 2 && edge.p2.connectedPoints.length < 2) {
+        if (edge.p1.connectedPoints.length < 3 && edge.p2.connectedPoints.length < 3) {
             edge.p1.addConnectedPoint(edge.p2);
             edge.p2.addConnectedPoint(edge.p1);
         }
     }
 }
 
-function edgeAsPrimativeLine(edge: Edge, key: string) {
-    const pointsAsVectors = [edge.p1, edge.p2].map(point => new THREE.Vector3(point.x, point.y, point.z));
-    const geometry = new THREE.BufferGeometry().setFromPoints(pointsAsVectors);
-    const material = new THREE.LineBasicMaterial({color: 0x0000ff});
-    return <primitive object={new THREE.Line(geometry, material)} key={key}/>
+
+function drawLinesFromPoints(points: Point[]) {
+    const lines = [];
+    for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        for (let j = 0; j < point.connectedPoints.length; j++) {
+            const connectedPoint = point.connectedPoints[j];
+            lines.push([point.x, point.y, point.z, connectedPoint.x, connectedPoint.y, connectedPoint.z]);
+        }
+    }
+
+    return lines.map((line, index) =>
+        <Line key={index} points={line} color={'#82ACFF'} lineWidth={5} />);
 }
 
 export interface HeaderGridProps {
@@ -91,6 +100,6 @@ export default function HeaderGrid({totalPoints}: HeaderGridProps) {
 
     return <Canvas>
         <OrbitControls/>
-        {edges.map((edge, i) => edgeAsPrimativeLine(edge, String(i)))}
+        {drawLinesFromPoints(points)}
     </Canvas>;
 }
