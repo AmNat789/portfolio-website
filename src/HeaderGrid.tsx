@@ -1,7 +1,9 @@
-import {Canvas} from "@react-three/fiber";
+import {Canvas, useFrame, useThree} from "@react-three/fiber";
 import {OrbitControls, Line} from "@react-three/drei";
 import * as THREE from "three";
-import {useLayoutEffect, useRef} from "react";
+import {useEffect, Suspense, useState, useRef} from "react";
+import {func} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {PerspectiveCamera} from "three";
 
 class Point {
     x: number;
@@ -86,7 +88,23 @@ function drawLinesFromPoints(points: Point[]) {
     }
 
     return lines.map((line, index) =>
-        <Line key={index} points={line} color={'#82ACFF'} lineWidth={5} />);
+        <Line
+            key={index}
+            points={line}
+            color={'white'}
+            vertexColors={[new THREE.Color('#FF5D9E'), new THREE.Color('#8F71FF'), new THREE.Color('#82ACFF'), new THREE.Color('#8BFFFF')]}
+            lineWidth={5}
+        />);
+}
+
+function RotateCamera(){
+    const cameraRef = useThree((state) => state.camera)
+
+    useFrame(() => {
+        cameraRef.rotation.y += 0.002;
+    });
+
+    return <></>
 }
 
 export interface HeaderGridProps {
@@ -99,7 +117,11 @@ export default function HeaderGrid({totalPoints}: HeaderGridProps) {
     setConnectedPoints(edges);
 
     return <Canvas>
-        <OrbitControls/>
-        {drawLinesFromPoints(points)}
+        <Suspense fallback={null}>
+            <RotateCamera/>
+            <ambientLight/>
+            <pointLight position={[10, 10, 10]}/>
+            {drawLinesFromPoints(points)}
+        </Suspense>
     </Canvas>;
 }
