@@ -13,7 +13,7 @@ interface GLTFResult extends GLTF{
 }
 
 function useRelativeMousePos() {
-    const [relPos, setRelPos] = useState<any>({x: 0, y: 0});
+    const [relPos, setRelPos] = useState<any>({x: 0.5, y: 0.5});
 
     useEffect(() => {
         const handleMouseMove = (event: {clientX: number, clientY: number}) => {
@@ -30,12 +30,14 @@ function useRelativeMousePos() {
         };
     }, []);
 
-    return [relPos || {x:0, y:0}, setRelPos]
+    return [relPos || {x:0.5, y:0.5}, setRelPos]
 }
 
 function Model({colors}: {colors: {[key: string]: any}}) {
     const gltf = useGLTF("/3d-models/B_Face.gltf") as GLTFResult;
     const depth = useRef();
+    const model1: any = useRef();
+    const model2: any = useRef();
 
     const [relPos, setRelPos] = useRelativeMousePos();
 
@@ -45,27 +47,43 @@ function Model({colors}: {colors: {[key: string]: any}}) {
         (Math.PI/4 )+ ((0.5 - relPos.x) * scale),
     ]
 
+    const baseRotation: [x: number, y: number, z: number] = [(Math.PI / 2), 0, (Math.PI / 4)]
+
+    useFrame((_, delta) => {
+        const speed = 5;
+
+        const m1R = getRotation(0.5)
+        const m2R = getRotation(0.3)
+
+        model1.current.rotation.x += (m1R[0] - model1.current.rotation.x) * delta * speed;
+        model1.current.rotation.z += (m1R[2] - model1.current.rotation.z) * delta * speed;
+        model2.current.rotation.x += (m2R[0] - model2.current.rotation.x) * delta * speed;
+        model2.current.rotation.z += (m2R[2] - model2.current.rotation.z) * delta * speed;
+    })
+
     return (
         <group>
             <mesh
-                rotation={getRotation(0.5)}
+                rotation={baseRotation}
                 geometry={gltf.nodes.Node_149997.geometry}
                 position={[0, 0, 0]}
+                ref={model1}
             >
                 <meshBasicMaterial color={colors.purple}/>
 
             </mesh>
             <mesh
-                rotation={getRotation(0.3)}
+                rotation={baseRotation}
                 geometry={gltf.nodes.Node_149997.geometry}
                 position={[0, 0, 0]}
+                ref={model2}
             >
                 <LayerMaterial>
                     {/*<Color color={'black'} alpha={1} mode={'normal'}/>*/}
                     <Gradient/>
                     <Depth colorA={colors.blue} colorB={colors.purple} alpha={0.5} mode="normal" near={0} far={3} origin={[1, 1, 1]} />
-                    <Depth ref={depth as any} colorA={colors.lightBlue} colorB="black" alpha={1} mode="lighten" near={0.25} far={2} origin={[1, 0, 0]} />
-                    <Fresnel mode="softlight" color="white" intensity={0.3} power={2} bias={0} />
+                    <Depth ref={depth as any} colorA={colors.lightBlue} colorB="black" alpha={1} mode="subtract" near={0.25} far={2} origin={[1, 0, 0]} />
+                    <Fresnel mode="screen" color="white" intensity={0.3} power={2} bias={0} />
                 </LayerMaterial>
             </mesh>
         </group>
