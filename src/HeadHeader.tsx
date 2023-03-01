@@ -127,7 +127,6 @@ export default function HeadHeader({colors}: {colors: {[key: string]: any}}) {
         camera={{ position: [0, 0, 1] }}
         >
             <Suspense fallback={null}>
-                <OrbitControls />
                 <Bg colors={colors}/>
                 {/*<ambientLight intensity={0.5} />*/}
                 <Lights/>
