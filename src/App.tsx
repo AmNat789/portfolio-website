@@ -32,11 +32,17 @@ function Plane() {
 }
 
 function App() {
+    const colors = {
+        pink: '#FF5D9E',
+        purple: '#8F71FF',
+        blue: '#82ACFF',
+        lightBlue: '#8BFFFF'
+    }
 
 
   return (
       // <HeaderGrid totalPoints={1000}/>
-      <HeadHeader/>
+      <HeadHeader colors={colors}/>
     // <Canvas>
     //     <OrbitControls />
     //   <Stars />

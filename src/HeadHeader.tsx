@@ -3,7 +3,7 @@ import {Canvas, useFrame} from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as THREE from "three";
-import { LayerMaterial, Color, Depth, Fresnel } from 'lamina'
+import { LayerMaterial, Color, Depth, Fresnel, Gradient } from 'lamina'
 
 
 interface GLTFResult extends GLTF{
@@ -33,31 +33,41 @@ function useRelativeMousePos() {
     return [relPos || {x:0, y:0}, setRelPos]
 }
 
-function Model() {
+function Model({colors}: {colors: {[key: string]: any}}) {
     const gltf = useGLTF("/3d-models/B_Face.gltf") as GLTFResult;
+    const depth = useRef();
 
     const [relPos, setRelPos] = useRelativeMousePos();
-    console.log(relPos.x);
-    const rotation: [x: number, y:number, z:number] = [
-        (Math.PI / 2) + ((-0.5 + relPos.y) * 0.5),
+
+    const getRotation = (scale: number): any => [
+        (Math.PI / 2) + ((-0.5 + relPos.y) * scale),
         0,
-        (Math.PI/4 )+ ((0.5 - relPos.x) * 0.5),
+        (Math.PI/4 )+ ((0.5 - relPos.x) * scale),
     ]
 
     return (
         <group>
             <mesh
-                rotation={rotation}
+                rotation={getRotation(0.5)}
                 geometry={gltf.nodes.Node_149997.geometry}
                 position={[0, 0, 0]}
             >
-                <meshStandardMaterial color={new THREE.Color('gray')}/>
+                <meshBasicMaterial color={colors.purple}/>
+
             </mesh>
-            {/*<mesh*/}
-            {/*    rotation={[Math.PI / 2,0, Math.PI/4]}*/}
-            {/*    geometry={gltf.nodes.Node_149997.geometry}*/}
-            {/*    position={[0, 0, 0]}*/}
-            {/*/>*/}
+            <mesh
+                rotation={getRotation(0.3)}
+                geometry={gltf.nodes.Node_149997.geometry}
+                position={[0, 0, 0]}
+            >
+                <LayerMaterial>
+                    {/*<Color color={'black'} alpha={1} mode={'normal'}/>*/}
+                    <Gradient/>
+                    <Depth colorA={colors.blue} colorB={colors.purple} alpha={0.5} mode="normal" near={0} far={3} origin={[1, 1, 1]} />
+                    <Depth ref={depth as any} colorA={colors.lightBlue} colorB="black" alpha={1} mode="lighten" near={0.25} far={2} origin={[1, 0, 0]} />
+                    <Fresnel mode="softlight" color="white" intensity={0.3} power={2} bias={0} />
+                </LayerMaterial>
+            </mesh>
         </group>
     );
 }
@@ -94,7 +104,7 @@ function Lights(){
     );
 }
 
-function Bg() {
+function Bg({colors}: {colors: {[key: string]: any}}) {
     const mesh: any = useRef()
     useFrame((state, delta) => {
         mesh.current.rotation.x = mesh.current.rotation.y = mesh.current.rotation.z += delta
@@ -103,24 +113,25 @@ function Bg() {
         <mesh ref={mesh} scale={100}>
             <sphereGeometry args={[1, 64, 64]} />
             <LayerMaterial attach="material" side={THREE.BackSide}>
-                <Color color={'#ff4eb8'} alpha={1} mode="normal" />
-                <Depth colorA={'#ff8f00'} colorB={'#00ffff'} alpha={0.5} mode="normal" near={0} far={300} origin={[100, 100, 100]} />
+                <Color color={colors.pink} alpha={1} mode="normal" />
+                <Depth colorA={colors.purple} colorB={colors.lightBlue} alpha={0.5} mode="normal" near={0} far={300} origin={[100, 100, 100]} />
             </LayerMaterial>
         </mesh>
     )
 }
 
-export default function HeadHeader() {
+export default function HeadHeader({colors}: {colors: {[key: string]: any}}) {
+
     return (
         <Canvas
         camera={{ position: [0, 0, 1] }}
         >
             <Suspense fallback={null}>
                 <OrbitControls />
-                <Bg/>
+                <Bg colors={colors}/>
                 {/*<ambientLight intensity={0.5} />*/}
                 <Lights/>
-                <Model />
+                <Model colors={colors}/>
             </Suspense>
         </Canvas>
     );
