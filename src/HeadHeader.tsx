@@ -34,20 +34,22 @@ function useRelativeMousePos() {
 }
 
 function Model({colors}: {colors: {[key: string]: any}}) {
-    const gltf = useGLTF("/3d-models/B_Face.gltf") as GLTFResult;
+    const gltf = useGLTF("/3d-models/Face.gltf") as GLTFResult;
     const depth = useRef();
     const model1: any = useRef();
     const model2: any = useRef();
 
     const [relPos, setRelPos] = useRelativeMousePos();
 
+    const baseRotation: [x: number, y: number, z: number] = [(Math.PI / 2), -0.05, (Math.PI / 4)]
+
+
     const getRotation = (scale: number): any => [
-        (Math.PI / 2) + ((-0.5 + relPos.y) * scale),
-        0,
-        (Math.PI/4 )+ ((0.5 - relPos.x) * scale),
+        baseRotation[0] + ((-0.5 + relPos.y) * scale),
+        baseRotation[1],
+        baseRotation[2]+ ((0.5 - relPos.x) * scale),
     ]
 
-    const baseRotation: [x: number, y: number, z: number] = [(Math.PI / 2), 0, (Math.PI / 4)]
 
     useFrame((_, delta) => {
         const speed = 5;
@@ -142,7 +144,7 @@ export default function HeadHeader({colors}: {colors: {[key: string]: any}}) {
 
     return (
         <Canvas
-        camera={{ position: [0, 0, 1] }}
+        camera={{ position: [0, 0, 0.75] }}
         >
             <Suspense fallback={null}>
                 <Bg colors={colors}/>

@@ -42,7 +42,9 @@ function App() {
 
   return (
       // <HeaderGrid totalPoints={1000}/>
-      <HeadHeader colors={colors}/>
+      <>
+          <HeadHeader colors={colors}/>
+      </>
     // <Canvas>
     //     <OrbitControls />
     //   <Stars />
