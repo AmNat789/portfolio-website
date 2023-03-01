@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Physics, useBox, usePlane } from "@react-three/cannon";
 import { OrbitControls, Stars } from "@react-three/drei";
 import HeaderGrid from "./HeaderGrid";
+import HeadHeader from "./HeadHeader";
 
 function Box() {
   const [ref, api]: any = useBox(() => ({ mass: 1, position: [0, 10, 0] }));
@@ -31,8 +32,11 @@ function Plane() {
 }
 
 function App() {
+
+
   return (
-      <HeaderGrid totalPoints={1000}/>
+      // <HeaderGrid totalPoints={1000}/>
+      <HeadHeader/>
     // <Canvas>
     //     <OrbitControls />
     //   <Stars />
