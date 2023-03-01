@@ -1,4 +1,4 @@
-import React, { Suspense, useRef } from "react";
+import React, {Suspense, useEffect, useRef, useState} from "react";
 import {Canvas, useFrame} from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
@@ -12,16 +12,42 @@ interface GLTFResult extends GLTF{
     }
 }
 
+function useRelativeMousePos() {
+    const [relPos, setRelPos] = useState<any>({x: 0, y: 0});
+
+    useEffect(() => {
+        const handleMouseMove = (event: {clientX: number, clientY: number}) => {
+            setRelPos({ x: event.clientX / window.innerWidth, y: event.clientY / window.innerHeight })
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener(
+                'mousemove',
+                handleMouseMove
+            );
+        };
+    }, []);
+
+    return [relPos || {x:0, y:0}, setRelPos]
+}
+
 function Model() {
     const gltf = useGLTF("/3d-models/B_Face.gltf") as GLTFResult;
-    // const material = new THREE.MeshBasicMaterial({
-    //     color: 0x00000,
-    // });
+
+    const [relPos, setRelPos] = useRelativeMousePos();
+    console.log(relPos.x);
+    const rotation: [x: number, y:number, z:number] = [
+        (Math.PI / 2) + ((-0.5 + relPos.y) * 0.5),
+        0,
+        (Math.PI/4 )+ ((0.5 - relPos.x) * 0.5),
+    ]
 
     return (
         <group>
             <mesh
-                rotation={[Math.PI / 2,0, Math.PI/4]}
+                rotation={rotation}
                 geometry={gltf.nodes.Node_149997.geometry}
                 position={[0, 0, 0]}
             >
